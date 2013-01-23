@@ -16,7 +16,6 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "fer_et_product")
-@XStreamConverter(ParamConverter.class)
 @XStreamAlias("product")
 public class Product implements Model {
 

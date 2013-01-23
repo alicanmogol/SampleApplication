@@ -1,7 +1,7 @@
 package com.sample.app.action;
 
 import com.fererlab.action.Action;
-import com.fererlab.action.SupportAction;
+import com.fererlab.action.SupportCRUDAction;
 import com.fererlab.dto.*;
 
 /**
@@ -15,7 +15,7 @@ public class GenericAction implements Action {
     public Response find(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
-            return new SupportAction(modelClass).find(request);
+            return new SupportCRUDAction(modelClass).find(request);
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
@@ -23,7 +23,7 @@ public class GenericAction implements Action {
     public Response findAll(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
-            return new SupportAction(modelClass).findAll(request);
+            return new SupportCRUDAction(modelClass).findAll(request);
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
@@ -32,7 +32,7 @@ public class GenericAction implements Action {
     public Response create(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
-            return new SupportAction(modelClass).create(request);
+            return new SupportCRUDAction(modelClass).create(request);
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
@@ -41,7 +41,7 @@ public class GenericAction implements Action {
     public Response update(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
-            return new SupportAction(modelClass).update(request);
+            return new SupportCRUDAction(modelClass).update(request);
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
@@ -50,7 +50,7 @@ public class GenericAction implements Action {
     public Response delete(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
-            return new SupportAction(modelClass).delete(request);
+            return new SupportCRUDAction(modelClass).delete(request);
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
@@ -59,7 +59,7 @@ public class GenericAction implements Action {
     public Response deleteAll(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
-            return new SupportAction(modelClass).deleteAll(request);
+            return new SupportCRUDAction(modelClass).deleteAll(request);
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }

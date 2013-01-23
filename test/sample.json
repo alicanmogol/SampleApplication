@@ -1,0 +1,28 @@
+{"object-array": [
+    {
+        "products": [
+            {
+                "@resolves-to": "list",
+                "product": [
+                    {
+                        "@resolves-to": "product",
+                        "id": 2,
+                        "serialNumber": "DNM987621"
+                    },
+                    {
+                        "@resolves-to": "product",
+                        "id": 1,
+                        "serialNumber": "ACM111"
+                    }
+                ]
+            }
+        ],
+        "product": {
+            "@resolves-to": "product",
+            "id": 1,
+            "serialNumber": "ACM111"
+        }
+    }
+]}
+
+

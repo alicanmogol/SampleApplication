@@ -5,7 +5,7 @@ import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
 import com.fererlab.dto.*;
 import com.sample.app.SampleApplication;
-import com.sample.app.action.ProductAction;
+import com.sample.app.action.ProductCRUDAction;
 import com.sample.app.model.Product;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -24,9 +24,22 @@ public class SampleTest {
     }
 
     public SampleTest() {
+        runXStreamTest();
         //runPropertiesTest();
-        runActionHandlerTest();
+        //runActionHandlerTest();
         //runTests();
+    }
+
+    private void runXStreamTest() {
+        XStream xstream = new XStream(new StaxDriver());
+        xstream.autodetectAnnotations(true);
+        xstream.setMode(XStream.NO_REFERENCES);
+
+        Product product = new Product();
+        product.setId(1L);
+        product.setSerialNumber("TEST123");
+        String productXML = xstream.toXML(product);
+        System.out.println("productXML: " + productXML);
     }
 
     private void runPropertiesTest() {
@@ -154,7 +167,7 @@ public class SampleTest {
         paramMap.addParam(new Param<String, Object>("id", 1L));
         paramMap.addParam(new Param<String, Object>("serialNumber", "NPR-0001234"));
 
-        ProductAction action = new ProductAction();
+        ProductCRUDAction action = new ProductCRUDAction();
         Product product = action.create(paramMap);
         System.out.println("product: " + product);
 
@@ -171,7 +184,7 @@ public class SampleTest {
 
     private void runTestFind() {
 
-        ProductAction action = new ProductAction();
+        ProductCRUDAction action = new ProductCRUDAction();
         Product product = action.find(1L);
         System.out.println("product: " + product);
 
@@ -190,7 +203,7 @@ public class SampleTest {
         ParamMap<String, Param<String, Object>> paramMap = new ParamMap<String, Param<String, Object>>();
         paramMap.addParam(new Param<String, Object>("id", 2L, ParamRelation.LT));
 
-        ProductAction action = new ProductAction();
+        ProductCRUDAction action = new ProductCRUDAction();
         List<Product> products = action.findAll(paramMap);
         System.out.println("products: " + products);
 
@@ -214,7 +227,7 @@ public class SampleTest {
     }
 
     private void runTestDelete() {
-        ProductAction action = new ProductAction();
+        ProductCRUDAction action = new ProductCRUDAction();
         int result = action.delete(1L);
         System.out.println("delete result: " + result);
     }

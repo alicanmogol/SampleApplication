@@ -1,15 +1,15 @@
 package com.sample.app.action;
 
-import com.fererlab.action.SupportAction;
+import com.fererlab.action.SupportCRUDAction;
 import com.fererlab.dto.*;
 import com.sample.app.model.*;
 
 /**
  * acm | 1/16/13
  */
-public class ProductAction extends SupportAction<Product> {
+public class ProductCRUDAction extends SupportCRUDAction<Product> {
 
-    public ProductAction() {
+    public ProductCRUDAction() {
         super(Product.class);
     }
 

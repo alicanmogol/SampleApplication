@@ -11,9 +11,9 @@ import java.util.List;
 /**
  * acm | 1/21/13
  */
-public class SupportAction<T extends Model> extends BaseAction<T> {
+public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
 
-    public SupportAction(Class<T> type) {
+    public SupportCRUDAction(Class<T> type) {
         super(type);
     }
 

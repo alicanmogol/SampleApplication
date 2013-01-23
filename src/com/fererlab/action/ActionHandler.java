@@ -24,7 +24,7 @@ public class ActionHandler {
             /*
             request method      ->    uri                ->   className, method
             GET                 ->    /welcome           ->   com.sample.app.action.MainAction, welcome
-            POST                ->    /product/details   ->   com.sample.app.action.ProductAction, details
+            POST                ->    /product/details   ->   com.sample.app.action.ProductCRUDAction, details
              */
 
             // comparator for the keys
@@ -51,21 +51,42 @@ public class ActionHandler {
                 properties.load(file.openStream());
             }
 
+            //      /welcome            [GET,POST]                       com.sample.app.action.MainAction            welcome        welcome
             for (String uri : properties.stringPropertyNames()) {
+                // uri  ->  /welcome
                 uri = uri.trim();
+
+                // methodExecutePart    ->          [GET,POST]                       com.sample.app.action.MainAction            welcome       welcome
                 String methodExecutePart = properties.getProperty(uri).trim();
                 methodExecutePart = methodExecutePart.substring(1, methodExecutePart.length());
+                /*
+                methodExecuteParts
+                [0]  GET,POST
+                [1]  com.sample.app.action.MainAction            welcome          welcome
+                 */
                 String[] methodExecuteParts = methodExecutePart.split("]");
+
+                /*
+                 requestMethods
+                 [0] GET
+                 [1] POST
+                  */
                 String[] requestMethods = methodExecuteParts[0].trim().split(",");
                 String className = null;
                 String methodName = null;
+                String templateName = null;
                 for (String s : methodExecuteParts[1].trim().split(" ")) {
                     s = s.trim();
                     if (!s.isEmpty()) {
                         if (className == null) {
+                            // com.sample.app.action.MainAction
                             className = s;
-                        } else {
+                        } else if (methodName == null) {
+                            // welcome
                             methodName = s;
+                        } else {
+                            // welcome
+                            templateName = s;
                             break;
                         }
                     }
@@ -80,7 +101,7 @@ public class ActionHandler {
                         executionMap.put(requestMethod, new TreeMap<String, Param<String, String>>(stringComparator));
                     }
                     // add this (uri -> className, methodName) to this request method's map
-                    executionMap.get(requestMethod).put(uri, new Param<String, String>(className, methodName));
+                    executionMap.get(requestMethod).put(uri, new Param<String, String>(className, methodName, templateName));
                 }
             }
 
@@ -107,6 +128,7 @@ public class ActionHandler {
         // define the className and methodName here
         String className = null;
         String methodName = null;
+        String templateName = null;
 
         // first check for the exact match
         // requestMethod    ->      GET
@@ -121,6 +143,8 @@ public class ActionHandler {
                 className = executionParam.getKey();
                 //   welcome
                 methodName = executionParam.getValue();
+                //   welcome
+                templateName = executionParam.getValueSecondary();
             }
 
             // if not found, try the starts with
@@ -134,6 +158,8 @@ public class ActionHandler {
                         className = executionParam.getKey();
                         //   welcome
                         methodName = executionParam.getValue();
+                        //   welcome
+                        templateName = executionParam.getValueSecondary();
                         break;
                     }
                 }
@@ -150,6 +176,8 @@ public class ActionHandler {
                         className = executionParam.getKey();
                         //   main
                         methodName = executionParam.getValue();
+                        //   main
+                        templateName = executionParam.getValueSecondary();
                     }
                 }
             }
@@ -169,6 +197,11 @@ public class ActionHandler {
 
         if (method != null) {
             try {
+                // add template to the request if template exists
+                if (templateName != null) {
+                    request.getParams().addParam(new Param<String, Object>(RequestKeys.RESPONSE_TEMPLATE.getValue(), templateName));
+                }
+
                 // return the response
                 return (Response) method.invoke(actionClass.newInstance(), request);
             } catch (Exception e) {
