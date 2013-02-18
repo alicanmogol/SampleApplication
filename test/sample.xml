@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="welcome.xsl"?>
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="welcome.xsl"?>
 <root>
     <products resolves-to="list">
         <product resolves-to="product">
@@ -11,9 +10,10 @@
             <serialNumber>ACM111</serialNumber>
         </product>
     </products>
-    <product resolves-to="product">
+    <ain resolves-to="product">
         <id>1</id>
         <serialNumber>ACM111</serialNumber>
     </product>
 </root>
+
 

@@ -1,6 +1,6 @@
 {"object-array": [
     {
-        "products": [
+        "Products": [
             {
                 "@resolves-to": "list",
                 "product": [
@@ -16,13 +16,6 @@
                     }
                 ]
             }
-        ],
-        "product": {
-            "@resolves-to": "product",
-            "id": 1,
-            "serialNumber": "ACM111"
-        }
+        ]
     }
 ]}
-
-

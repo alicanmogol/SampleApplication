@@ -22,6 +22,14 @@ public class BaseCRUDAction<T extends Model> extends BaseAction implements CRUDA
     public BaseCRUDAction(Class<T> type) {
         super();
         this.type = type;
+
+        getXStream().autodetectAnnotations(true);
+        getXStream().alias(type.getSimpleName(), type);
+        getXStream().alias(type.getSimpleName() + "s", com.avaje.ebean.common.BeanList.class);
+
+        getXStreamJSON().autodetectAnnotations(true);
+        getXStreamJSON().alias(type.getSimpleName(), type);
+        getXStreamJSON().alias(type.getSimpleName() + "s", com.avaje.ebean.common.BeanList.class);
     }
 
     @Override
