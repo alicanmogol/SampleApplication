@@ -46,6 +46,8 @@ public class BaseAction implements Action {
             StringBuilder responseContent = new StringBuilder();
             responseContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             responseContent.append("<?xml-stylesheet type=\"text/xsl\" href=\"")
+                    .append(String.valueOf(request.getParams().getValue(RequestKeys.APPLICATION_URI.getValue())))
+                    .append("/")
                     .append(String.valueOf(request.getParams().getValue(RequestKeys.RESPONSE_TEMPLATE.getValue())))
                     .append(".xsl\"?>");
             responseContent.append("<root>");
