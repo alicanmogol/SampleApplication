@@ -22,28 +22,23 @@ public class MainAction extends BaseAction {
         getXStream().alias("products", productList.getClass());
         getXStreamJSON().alias("products", productList.getClass());
 
-        Product product = productAction.find(Long.valueOf(String.valueOf(request.getParams().getValue("id"))));
-
-        String responseContent;
-        if (request.getParams().containsKey(RequestKeys.RESPONSE_TEMPLATE.getValue())) {
-            responseContent = toResponseContent(
-                    request,
-                    String.valueOf(request.getParams().getValue(RequestKeys.RESPONSE_TEMPLATE.getValue())),
-                    toContent(request, productList, product)
-            );
-        } else {
-            responseContent = toContent(request, productList, product);
+        Product product = null;
+        if (request.getParams().containsKey("id")) {
+            product = productAction.find(Long.valueOf(String.valueOf(request.getParams().getValue("id"))));
         }
+
         return Response.create(
                 request,
-                responseContent,
+                toContent(request, productList, product),
                 Status.STATUS_OK
         );
 
     }
 
     public Response main(Request request) {
-        return Response.create(request, "main page", Status.STATUS_OK);
+        ProductCRUDAction productAction = new ProductCRUDAction();
+        List<Product> productList = productAction.findAll(new ParamMap<String, Param<String, Object>>());
+        return Response.create(request, productAction.toContent(request, productList), Status.STATUS_OK);
     }
 
 

@@ -1,6 +1,6 @@
 package com.sample.app.action;
 
-import com.fererlab.action.Action;
+import com.fererlab.action.BaseAction;
 import com.fererlab.action.SupportCRUDAction;
 import com.fererlab.dto.*;
 
@@ -8,8 +8,9 @@ import com.fererlab.dto.*;
  * acm | 1/22/13
  */
 @SuppressWarnings("unchecked")
-public class GenericAction implements Action {
+public class GenericAction extends BaseAction {
 
+    // TODO move ENTITY_PACKAGE to config file
     private String ENTITY_PACKAGE = "com.sample.app.model";
 
     public Response find(Request request) {
@@ -28,7 +29,6 @@ public class GenericAction implements Action {
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
 
-
     public Response create(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
@@ -36,7 +36,6 @@ public class GenericAction implements Action {
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
-
 
     public Response update(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
@@ -46,7 +45,6 @@ public class GenericAction implements Action {
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
 
-
     public Response delete(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
@@ -55,7 +53,6 @@ public class GenericAction implements Action {
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
 
-
     public Response deleteAll(Request request) {
         Class<? extends Model> modelClass = getModelClass(request);
         if (modelClass != null) {
@@ -63,7 +60,6 @@ public class GenericAction implements Action {
         }
         return Response.create(request, Status.STATUS_NOT_FOUND.getMessage(), Status.STATUS_NOT_FOUND);
     }
-
 
     private Class<? extends Model> getModelClass(Request request) {
         String[] requestURIParts = request.getParams().get(RequestKeys.URI.getValue()).getValue().toString().split("/");
