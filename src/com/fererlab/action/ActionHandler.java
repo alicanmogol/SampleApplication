@@ -23,7 +23,7 @@ public class ActionHandler {
 
             /*
             request method      ->    uri                ->   className, method
-            GET                 ->    /welcome           ->   com.sample.app.action.MainAction, welcome
+            GET                 ->    /welcome           ->   com.sample.app.action.MainAction, welcome       welcomeTemplate
             POST                ->    /product/details   ->   com.sample.app.action.ProductCRUDAction, details
              */
 
@@ -119,6 +119,19 @@ public class ActionHandler {
         // get the request Method(GET, POST etc.) and URI
         String requestMethod = request.getParams().get(RequestKeys.REQUEST_METHOD.getValue()).getValue().toString();
         String requestURI = request.getParams().get(RequestKeys.URI.getValue()).getValue().toString();
+
+        if (requestURI.startsWith("/_xsl_/")) {
+            String xslTemplate = requestURI.substring("/_xsl_/".length());
+
+            XSLTemplateHandler xslTemplateHandler = new XSLTemplateHandler();
+            String templateContent = xslTemplateHandler.getTemplateContent(xslTemplate);
+            return new Response(
+                    new ParamMap<String, Param<String, Object>>(),
+                    request.getSession(),
+                    Status.STATUS_OK,
+                    templateContent
+            );
+        }
 
         // remove the forward slash if there is any
         if (requestURI.endsWith("/")) {
