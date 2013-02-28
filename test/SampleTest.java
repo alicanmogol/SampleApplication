@@ -100,7 +100,7 @@ public class SampleTest {
         System.out.println("connectToDB ------> " + (System.currentTimeMillis() - start));
         ParamMap<String, Param<String, Object>> headers = new ParamMap<String, Param<String, Object>>();
         ParamMap<String, Param<String, Object>> params = new ParamMap<String, Param<String, Object>>();
-        Session<String, String> session = new Session<String, String>();
+        Session session = new Session();
 
         params.addParam(new Param<String, Object>(RequestKeys.REQUEST_METHOD.getValue(), "GET"));
         params.addParam(new Param<String, Object>(RequestKeys.URI.getValue(), "/*/get/product"));
