@@ -6,6 +6,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,9 +49,12 @@ public class BaseAction implements Action {
             responseContent.append("<?xml-stylesheet type=\"text/xsl\" href=\"")
                     .append("http://localhost")
                     .append(String.valueOf(request.getParams().getValue(RequestKeys.APPLICATION_URI.getValue())))
-                    .append("/_xsl_/")
+                    .append("/_/xsl/")
                     .append(String.valueOf(request.getParams().getValue(RequestKeys.RESPONSE_TEMPLATE.getValue())))
-                    .append(".xsl\"?>");
+                    .append(".xsl")
+                    .append("?")
+                    .append(new Random().nextDouble())
+                    .append("\"?>");
             responseContent.append("<root>");
             responseContent.append(toXML(objects));
             responseContent.append("</root>");

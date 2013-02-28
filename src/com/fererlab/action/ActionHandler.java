@@ -120,11 +120,16 @@ public class ActionHandler {
         String requestMethod = request.getParams().get(RequestKeys.REQUEST_METHOD.getValue()).getValue().toString();
         String requestURI = request.getParams().get(RequestKeys.URI.getValue()).getValue().toString();
 
-        if (requestURI.startsWith("/_xsl_/")) {
-            String xslTemplate = requestURI.substring("/_xsl_/".length());
+        // URI starting with /_/ indicates it is a resource but not an action
+        if (requestURI.startsWith("/_/")) {
 
-            XSLTemplateHandler xslTemplateHandler = new XSLTemplateHandler();
-            String templateContent = xslTemplateHandler.getTemplateContent(xslTemplate);
+            requestURI = requestURI.substring(3);
+
+            // request URI is either one of these; xsl, css, js, image, file,
+            String[] foldersAndFile = requestURI.split("/", 2);
+            String xslTemplate = requestURI.substring((foldersAndFile[0] + "/").length());
+            FileContentHandler fileContentHandler = new FileContentHandler();
+            String templateContent = fileContentHandler.getContent(foldersAndFile[0], xslTemplate);
             return new Response(
                     new ParamMap<String, Param<String, Object>>(),
                     request.getSession(),
