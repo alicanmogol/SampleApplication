@@ -3,7 +3,6 @@ package com.sample.app.action;
 import com.fererlab.action.BaseAction;
 import com.fererlab.dto.*;
 import com.sample.app.model.Product;
-import sun.misc.BASE64Encoder;
 
 import java.util.List;
 
@@ -28,17 +27,18 @@ public class MainAction extends BaseAction {
             product = productAction.find(Long.valueOf(String.valueOf(request.getParams().getValue("id"))));
         }
 
+        // add encoded cookie
+        request.getSession().putEncoded("encoded-content", "content here111");
 
-        request.getSession().putEncoded("encoded-content", "content here");
-
+        // add encrypted cookie
         try {
             request.getSession().putEncrypt("KEY_HEREKEY_HERE", "encrypted-content", "content here");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-
-        request.getSession().put("encoded-content", new BASE64Encoder().encode("content here".getBytes()));
+        //request.getSession().deleteAll();
+        request.getSession().put("test", "123");
 
         return Response.create(
                 request,

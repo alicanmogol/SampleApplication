@@ -40,6 +40,10 @@ public class SampleApplication implements Application {
 
     @Override
     public Response runApplication(final Request request) {
+
+        // set the cookie secret sign key
+        request.getSession().setCookieSignSecretKey("SAMPLE_APPLICATION_SECRET_KEY");
+
         return actionHandler.runAction(request);
     }
 
