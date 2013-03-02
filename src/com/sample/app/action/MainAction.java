@@ -5,6 +5,7 @@ import com.fererlab.dto.*;
 import com.sample.app.model.Product;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * acm | 1/21/13
@@ -32,13 +33,13 @@ public class MainAction extends BaseAction {
 
         // add encrypted cookie
         try {
-            request.getSession().putEncrypt("KEY_HEREKEY_HERE", "encrypted-content", "content here");
+            request.getSession().putEncrypt("KEY_HEREKEY_HERE", "encrypted-content", "content here ");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         //request.getSession().deleteAll();
-        request.getSession().put("test", "123");
+        request.getSession().put("test", "" + new Random().nextDouble());
 
         return Response.create(
                 request,

@@ -41,8 +41,8 @@ public class SampleApplication implements Application {
     @Override
     public Response runApplication(final Request request) {
 
-        // set the cookie secret sign key
-        request.getSession().setCookieSignSecretKey("SAMPLE_APPLICATION_SECRET_KEY");
+        // read the cookie to Session object
+        request.getSession().fromCookie("SampleApplication", "11cdc979547a8631cb477c052289b4837bd3c6c6-26e04590c57a839c7fe9956608b3");
 
         return actionHandler.runAction(request);
     }
