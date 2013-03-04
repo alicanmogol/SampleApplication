@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
     <output url="file://$MODULE_DIR$/../bucket-apps/SampleApplication" />
     <output-test url="file:///tmp/home/alican/projects/fererlab/SampleApplication/out/test/SampleApplication" />
     <exclude-output />

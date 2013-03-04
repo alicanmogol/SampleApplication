@@ -6,6 +6,7 @@ import sun.misc.BASE64Encoder;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.TreeMap;
@@ -13,7 +14,7 @@ import java.util.TreeMap;
 /**
  * acm 10/15/12
  */
-public class Session extends TreeMap<String, String> {
+public class Session extends TreeMap<String, Serializable> {
 
     private BASE64Encoder base64Encoder = new BASE64Encoder();
     private BASE64Decoder base64Decoder = new BASE64Decoder();

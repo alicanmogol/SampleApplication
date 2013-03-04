@@ -17,7 +17,10 @@ import java.io.File;
  */
 public class SampleApplication implements Application {
 
-    private ActionHandler actionHandler = new ActionHandler(getClass().getClassLoader().getResource("executionmap.properties"));
+    private ActionHandler actionHandler = new ActionHandler(
+            getClass().getClassLoader().getResource("ExecutionMap.properties"),
+            getClass().getClassLoader().getResource("AuthenticationAuthorizationMap.properties")
+    );
     private EbeanServer ebeanServer = null;
     private boolean isDevelopment = false;
 
@@ -44,7 +47,8 @@ public class SampleApplication implements Application {
         // read the cookie to Session object
         request.getSession().fromCookie("SampleApplication", "11cdc979547a8631cb477c052289b4837bd3c6c6-26e04590c57a839c7fe9956608b3");
 
-        return actionHandler.runAction(request);
+        Response response = actionHandler.runAction(request);
+        return response;
     }
 
     @Override

@@ -51,7 +51,7 @@ public class SampleTest {
             Map<String, Map<String, Param<String, String>>> executionMap
                     = new HashMap<String, Map<String, Param<String, String>>>();
 
-            String executionMapFile = getClass().getResource(".").getPath() + "executionmap.properties";
+            String executionMapFile = getClass().getResource(".").getPath() + "ExecutionMap.properties";
             Properties properties = new Properties();
             properties.load(new FileReader(executionMapFile));
 

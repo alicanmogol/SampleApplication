@@ -1,116 +1,28 @@
 package com.fererlab.action;
 
+import com.fererlab.aa.AuthenticationAuthorizationMap;
+import com.fererlab.aa.ExecutionMap;
 import com.fererlab.dto.*;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * acm | 1/16/13
  */
 public class ActionHandler {
 
-    private Map<String, Map<String, Param<String, String>>> executionMap = new TreeMap<String, Map<String, Param<String, String>>>();
+    private ExecutionMap executionMap = new ExecutionMap();
+    private AuthenticationAuthorizationMap authenticationAuthorizationMap = new AuthenticationAuthorizationMap();
 
-    public ActionHandler(URL executionmapFile) {
-        readUriExecutionMap(executionmapFile);
+    public ActionHandler(URL executionMapFile, URL authenticationAuthorizationMapFile) {
+        executionMap.readUriExecutionMap(executionMapFile);
+        authenticationAuthorizationMap.readAuthenticationAuthorizationMap(authenticationAuthorizationMapFile);
     }
 
-    private void readUriExecutionMap(URL file) {
-        try {
-
-            /*
-            request method      ->    uri                ->   className, method
-            GET                 ->    /welcome           ->   com.sample.app.action.MainAction, welcome       welcomeTemplate
-            POST                ->    /product/details   ->   com.sample.app.action.ProductCRUDAction, details
-             */
-
-            // comparator for the keys
-            Comparator<String> stringComparator = new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    if (o1.length() < o2.length()) {
-                        return 1;
-                    } else if (o1.length() > o2.length()) {
-                        return -1;
-                    }
-                    return o1.compareTo(o2);
-                }
-            };
-
-            executionMap = new TreeMap<String, Map<String, Param<String, String>>>(stringComparator);
-
-            // read executionmap.properties
-            if (file == null) {
-                file = getClass().getClassLoader().getResource("executionmap.properties");
-            }
-            Properties properties = new Properties();
-            if (file != null) {
-                properties.load(file.openStream());
-            }
-
-            //      /welcome            [GET,POST]                       com.sample.app.action.MainAction            welcome        welcome
-            for (String uri : properties.stringPropertyNames()) {
-                // uri  ->  /welcome
-                uri = uri.trim();
-
-                // methodExecutePart    ->          [GET,POST]                       com.sample.app.action.MainAction            welcome       welcome
-                String methodExecutePart = properties.getProperty(uri).trim();
-                methodExecutePart = methodExecutePart.substring(1, methodExecutePart.length());
-                /*
-                methodExecuteParts
-                [0]  GET,POST
-                [1]  com.sample.app.action.MainAction            welcome          welcome
-                 */
-                String[] methodExecuteParts = methodExecutePart.split("]");
-
-                /*
-                 requestMethods
-                 [0] GET
-                 [1] POST
-                  */
-                String[] requestMethods = methodExecuteParts[0].trim().split(",");
-                String className = null;
-                String methodName = null;
-                String templateName = null;
-                for (String s : methodExecuteParts[1].trim().split(" ")) {
-                    s = s.trim();
-                    if (!s.isEmpty()) {
-                        if (className == null) {
-                            // com.sample.app.action.MainAction
-                            className = s;
-                        } else if (methodName == null) {
-                            // welcome
-                            methodName = s;
-                        } else {
-                            // welcome
-                            templateName = s;
-                            break;
-                        }
-                    }
-                }
-
-                // requestMethods are like GET, POST, DELETE, PUT etc.
-                for (String requestMethod : requestMethods) {
-                    // trim the request method string, there may be some empty strings coming from properties entry
-                    requestMethod = requestMethod.trim();
-                    // if there is not entry until now, put an empty HashMap
-                    if (!executionMap.containsKey(requestMethod)) {
-                        executionMap.put(requestMethod, new TreeMap<String, Param<String, String>>(stringComparator));
-                    }
-                    // add this (uri -> className, methodName) to this request method's map
-                    executionMap.get(requestMethod).put(uri, new Param<String, String>(className, methodName, templateName));
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Response runAction(Request request) {
+    public Response runAction(final Request request) {
 
         // prepare method and action class
         Method method = null;
@@ -123,6 +35,7 @@ public class ActionHandler {
         // URI starting with /_/ indicates it is a resource but not an action
         if (requestURI.startsWith("/_/")) {
 
+            // remove the first 3 chars, {/,_,/}
             requestURI = requestURI.substring(3);
 
             // request URI is either one of these; xsl, css, js, image, file,
@@ -150,7 +63,8 @@ public class ActionHandler {
 
         // first check for the exact match
         // requestMethod    ->      GET
-        if (executionMap.containsKey(requestMethod)) {
+        if (executionMap.containsKey(requestMethod) || executionMap.containsKey("*")) {
+
             // uriExecutionMap contains all the URI -> execution mapping for this request method
             Map<String, Param<String, String>> uriExecutionMap = executionMap.get(requestMethod);
             // requestURI           /welcome        or       /welcome/
@@ -170,8 +84,10 @@ public class ActionHandler {
 
                 for (String uri : uriExecutionMap.keySet()) {
                     if (uri.startsWith(requestURI) || requestURI.startsWith(uri)) {
+                        // set the current uri to requestURI
+                        requestURI = uri;
                         //   com.sample.app.action.MainAction, welcome
-                        Param<String, String> executionParam = uriExecutionMap.get(uri);
+                        Param<String, String> executionParam = uriExecutionMap.get(requestURI);
                         //   com.sample.app.action.MainAction
                         className = executionParam.getKey();
                         //   welcome
@@ -188,8 +104,10 @@ public class ActionHandler {
                 if (executionMap.containsKey("*")) {
                     uriExecutionMap = executionMap.get("*");
                     if (uriExecutionMap.containsKey("/")) {
+                        // set the current uri to requestURI
+                        requestURI = "/";
                         //   com.sample.app.action.MainAction, main
-                        Param<String, String> executionParam = uriExecutionMap.get("/");
+                        Param<String, String> executionParam = uriExecutionMap.get(requestURI);
                         //   com.sample.app.action.MainAction
                         className = executionParam.getKey();
                         //   main
@@ -201,8 +119,123 @@ public class ActionHandler {
             }
 
 
-        }
+            // check the AuthenticationAuthorizationMap contains requestMethod
+            if (authenticationAuthorizationMap.containsKey(requestMethod)
+                    || authenticationAuthorizationMap.containsKey("*")) {
 
+                // find the user's group names
+                String[] groupNamesCommaSeparated = null;
+                if (request.getSession().containsKey(SessionKeys.GROUP_NAMES.getValue())) {
+                    groupNamesCommaSeparated = ((String) request.getSession().get(SessionKeys.GROUP_NAMES.getValue())).split(",");
+                }
+
+                // authorization flag for user's group
+                boolean userAuthorized = false;
+
+                // for this http request method, like GET, POST or PUT
+                Map<String, List<String>> uriGroupNames = authenticationAuthorizationMap.get(requestMethod);
+
+                // check this requested uri has any authentication/authorization
+                if (uriGroupNames.containsKey(requestURI)) {
+
+                    // the user does not have any groups but this uri needs some
+                    // return STATUS_UNAUTHORIZED and redirect
+                    if (groupNamesCommaSeparated == null) {
+                        ParamMap<String, Param<String, Object>> stringParamParamMap = new ParamMap<String, Param<String, Object>>();
+                        Object hostName = request.getHeaders().getValue(RequestKeys.HOST_NAME.getValue());
+                        Object hostPort = request.getHeaders().getValue(RequestKeys.HOST_PORT.getValue());
+                        Object applicationUri = request.getParams().getValue(RequestKeys.APPLICATION_URI.getValue());
+                        String redirectUrl = hostName + ":" + (hostPort != null ? hostPort : "") + "/" + applicationUri;
+                        stringParamParamMap.addParam(new Param<String, Object>("Refresh", "0; url=http://" + redirectUrl));
+                        return new Response(
+                                stringParamParamMap,
+                                request.getSession(),
+                                Status.STATUS_UNAUTHORIZED,
+                                ""
+                        );
+                    }
+
+                    // find the required group names
+                    List<String> authorizedGroups = uriGroupNames.get(requestURI);
+                    for (String userGroupName : groupNamesCommaSeparated) {
+                        if (authorizedGroups.contains(userGroupName)) {
+                            userAuthorized = true;
+                            break;
+                        }
+                    }
+
+                    // if the user is not authorized return STATUS_UNAUTHORIZED and redirect
+                    if (!userAuthorized) {
+                        return new Response(
+                                new ParamMap<String, Param<String, Object>>() {{
+                                    Object hostName = request.getParams().getValue(RequestKeys.HOST_NAME.getValue());
+                                    Object hostPort = request.getParams().getValue(RequestKeys.HOST_PORT.getValue());
+                                    Object applicationUri = request.getParams().getValue(RequestKeys.APPLICATION_URI.getValue());
+                                    String redirectUrl = hostName + ":" + (hostPort != null ? hostPort : "") + "/" + applicationUri;
+                                    addParam(new Param<String, Object>("Refresh", "0; url=http://" + redirectUrl));
+                                }},
+                                request.getSession(),
+                                Status.STATUS_UNAUTHORIZED,
+                                ""
+                        );
+                    }
+                }
+
+
+                // check for the [*] all http method request map
+                if (!userAuthorized) {
+
+                    // [*] http request method
+                    uriGroupNames = authenticationAuthorizationMap.get("*");
+
+                    // check this requested uri has any authentication/authorization
+                    if (uriGroupNames.containsKey(requestURI)) {
+
+                        // the user does not have any groups but this uri needs some
+                        // return STATUS_UNAUTHORIZED and redirect
+                        if (groupNamesCommaSeparated == null) {
+                            return new Response(
+                                    new ParamMap<String, Param<String, Object>>() {{
+                                        Object hostName = request.getParams().getValue(RequestKeys.HOST_NAME.getValue());
+                                        Object hostPort = request.getParams().getValue(RequestKeys.HOST_PORT.getValue());
+                                        Object applicationUri = request.getParams().getValue(RequestKeys.APPLICATION_URI.getValue());
+                                        String redirectUrl = hostName + ":" + (hostPort != null ? hostPort : "") + "" + applicationUri;
+                                        addParam(new Param<String, Object>("Refresh", "0; url=http://" + redirectUrl));
+                                    }},
+                                    request.getSession(),
+                                    Status.STATUS_UNAUTHORIZED,
+                                    ""
+                            );
+                        }
+
+                        // find the required group names
+                        List<String> authorizedGroups = uriGroupNames.get(requestURI);
+                        for (String userGroupName : groupNamesCommaSeparated) {
+                            if (authorizedGroups.contains(userGroupName)) {
+                                userAuthorized = true;
+                                break;
+                            }
+                        }
+
+                        // if the user is not authorized return STATUS_UNAUTHORIZED and redirect
+                        if (!userAuthorized) {
+                            return new Response(
+                                    new ParamMap<String, Param<String, Object>>() {{
+                                        Object hostName = request.getParams().getValue(RequestKeys.HOST_NAME.getValue());
+                                        Object hostPort = request.getParams().getValue(RequestKeys.HOST_PORT.getValue());
+                                        Object applicationUri = request.getParams().getValue(RequestKeys.APPLICATION_URI.getValue());
+                                        String redirectUrl = hostName + ":" + (hostPort != null ? hostPort : "") + "/" + applicationUri;
+                                        addParam(new Param<String, Object>("Refresh", "0; url=http://" + redirectUrl));
+                                    }},
+                                    request.getSession(),
+                                    Status.STATUS_UNAUTHORIZED,
+                                    ""
+                            );
+                        }
+                    }
+                }
+            }
+        }
 
         // set Class and Method
         try {
