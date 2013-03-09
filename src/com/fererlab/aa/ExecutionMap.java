@@ -110,4 +110,12 @@ public class ExecutionMap extends TreeMap<String, Map<String, Param<String, Stri
 
     }
 
+    @Override
+    public Map<String, Param<String, String>> get(Object key) {
+        Map<String, Param<String, String>> map = super.get(key);
+        if (map == null) {
+            return new TreeMap<String, Param<String, String>>();
+        }
+        return map;
+    }
 }
