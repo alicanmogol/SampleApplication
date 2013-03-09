@@ -124,7 +124,7 @@ public class ActionHandler {
                     || authenticationAuthorizationMap.containsKey("*")) {
 
                 // find the user's group names
-                String[] groupNamesCommaSeparated = null;
+                String[] groupNamesCommaSeparated = new String[]{"admin"};
                 if (request.getSession().containsKey(SessionKeys.GROUP_NAMES.getValue())) {
                     groupNamesCommaSeparated = ((String) request.getSession().get(SessionKeys.GROUP_NAMES.getValue())).split(",");
                 }
@@ -155,14 +155,25 @@ public class ActionHandler {
                         );
                     }
 
-                    // find the required group names
+                    // authorized groups for this uri
                     List<String> authorizedGroups = uriGroupNames.get(requestURI);
-                    for (String userGroupName : groupNamesCommaSeparated) {
-                        if (authorizedGroups.contains(userGroupName)) {
-                            userAuthorized = true;
-                            break;
+
+                    // user has at least one group, it means user is authenticated
+                    // if the authorizedGroups contains (*) it means any authenticated client may request this uri
+                    if (authorizedGroups.contains("*")) {
+                        userAuthorized = true;
+                    }
+
+                    // find the required group names
+                    else {
+                        for (String userGroupName : groupNamesCommaSeparated) {
+                            if (authorizedGroups.contains(userGroupName)) {
+                                userAuthorized = true;
+                                break;
+                            }
                         }
                     }
+
 
                     // if the user is not authorized return STATUS_UNAUTHORIZED and redirect
                     if (!userAuthorized) {

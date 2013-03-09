@@ -1,6 +1,9 @@
 package com.fererlab.dto;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * acm 10/15/12
@@ -61,6 +64,51 @@ public class Response implements Serializable {
                 '}';
     }
 
+    public byte[] write() {
+        StringBuilder sb = new StringBuilder();
+        // add response code
+        sb.append(headers.get(ResponseKeys.PROTOCOL.getValue()).getValue());
+        sb.append(" ");
+        sb.append(status.getStatus());
+        sb.append(" ");
+        sb.append(status.getMessage());
+        sb.append("\n");
+
+
+        // add date
+        sb.append("Date: ");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy  HH:mm:ss z");
+        sb.append(simpleDateFormat.format(new Date()));
+        sb.append("\n");
+
+        // set cookie
+        sb.append(getSession().toCookie());
+
+        // add all the headers
+        for (Param<String, Object> param : headers.getParamList()) {
+            sb.append(param.getKey());
+            sb.append(": ");
+            sb.append(param.getValue());
+            sb.append("\n");
+        }
+
+        // end headers
+        sb.append("\r\n");
+
+        // add content
+        sb.append(content);
+
+        // append the delimiters
+        sb.append("\n\r\n\r");
+
+        try {
+            return sb.toString().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return sb.toString().getBytes();
+        }
+
+    }
+
     /*
     static create response method
      */
@@ -70,8 +118,21 @@ public class Response implements Serializable {
                 new ParamMap<String, Param<String, Object>>(),
                 request.getSession(),
                 status,
-                content
+                content == null ? "" : content
         );
     }
 
+    public static Response internalServerError(Request request, Exception e) {
+        StringBuilder exception = new StringBuilder();
+        exception.append("\n<h3>\n");
+        exception.append(e.getClass().getName());
+        exception.append(": ");
+        exception.append(e.getMessage());
+        exception.append("\n</h3><h5>\n");
+        for (StackTraceElement element : e.getStackTrace()) {
+            exception.append(element.getClassName()).append(".").append(element.getMethodName()).append("(").append(element.getFileName()).append(":").append(element.getLineNumber()).append(")").append("\n<br/>\n");
+        }
+        e.printStackTrace();
+        return Response.create(request, "<h1>" + Status.STATUS_INTERNAL_SERVER_ERROR.getMessage() + "</h1>" + exception + "</h5>", Status.STATUS_INTERNAL_SERVER_ERROR);
+    }
 }

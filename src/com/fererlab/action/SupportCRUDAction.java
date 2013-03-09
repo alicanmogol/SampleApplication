@@ -25,7 +25,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
                     Status.STATUS_OK
             );
         } catch (Exception e) {
-            return Response.create(request, e.getMessage(), Status.STATUS_INTERNAL_SERVER_ERROR);
+            return Response.internalServerError(request, e);
         }
     }
 
@@ -37,7 +37,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
                     Status.STATUS_OK
             );
         } catch (Exception e) {
-            return Response.create(request, e.getMessage(), Status.STATUS_INTERNAL_SERVER_ERROR);
+            return Response.internalServerError(request, e);
         }
     }
 
@@ -52,7 +52,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
                     Status.STATUS_CREATED
             );
         } catch (Exception e) {
-            return Response.create(request, e.getMessage(), Status.STATUS_INTERNAL_SERVER_ERROR);
+            return Response.internalServerError(request, e);
         }
     }
 
@@ -70,7 +70,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
                     Status.STATUS_OK
             );
         } catch (Exception e) {
-            return Response.create(request, e.getMessage(), Status.STATUS_INTERNAL_SERVER_ERROR);
+            return Response.internalServerError(request, e);
         }
     }
 
@@ -82,7 +82,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
                     Status.STATUS_OK
             );
         } catch (Exception e) {
-            return Response.create(request, e.getMessage(), Status.STATUS_INTERNAL_SERVER_ERROR);
+            return Response.internalServerError(request, e);
         }
     }
 
@@ -99,7 +99,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
                     Status.STATUS_OK
             );
         } catch (Exception e) {
-            return Response.create(request, e.getMessage(), Status.STATUS_INTERNAL_SERVER_ERROR);
+            return Response.internalServerError(request, e);
         }
     }
 
