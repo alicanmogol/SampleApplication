@@ -1,11 +1,13 @@
 package com.fererlab.action;
 
-import com.fererlab.aa.AuthenticationAuthorizationMap;
-import com.fererlab.aa.ExecutionMap;
+import com.fererlab.map.AuthenticationAuthorizationMap;
+import com.fererlab.map.ExecutionMap;
+import com.fererlab.map.MimeTypeMap;
 import com.fererlab.dto.*;
 
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,10 +18,12 @@ public class ActionHandler {
 
     private ExecutionMap executionMap = new ExecutionMap();
     private AuthenticationAuthorizationMap authenticationAuthorizationMap = new AuthenticationAuthorizationMap();
+    private MimeTypeMap mimeTypeMap = new MimeTypeMap();
 
-    public ActionHandler(URL executionMapFile, URL authenticationAuthorizationMapFile) {
+    public ActionHandler(URL executionMapFile, URL authenticationAuthorizationMapFile, URL mimeTypeMapFile) {
         executionMap.readUriExecutionMap(executionMapFile);
         authenticationAuthorizationMap.readAuthenticationAuthorizationMap(authenticationAuthorizationMapFile);
+        mimeTypeMap.readMimeTypeMap(mimeTypeMapFile);
     }
 
     public Response runAction(final Request request) {
@@ -40,15 +44,24 @@ public class ActionHandler {
 
             // request URI is either one of these; xsl, css, js, image, file,
             String[] foldersAndFile = requestURI.split("/", 2);
-            String xslTemplate = requestURI.substring((foldersAndFile[0] + "/").length());
+            String fileName = requestURI.substring((foldersAndFile[0] + "/").length());
             FileContentHandler fileContentHandler = new FileContentHandler();
-            String templateContent = fileContentHandler.getContent(foldersAndFile[0], xslTemplate);
-            return new Response(
+            byte[] templateContent = fileContentHandler.getContent(foldersAndFile[0], fileName);
+
+            Response response =  new Response(
                     new ParamMap<String, Param<String, Object>>(),
                     request.getSession(),
                     Status.STATUS_OK,
                     templateContent
             );
+            response.getHeaders().put(
+                    ResponseKeys.RESPONSE_TYPE.getValue(),
+                    new Param<String, Object>(
+                            ResponseKeys.RESPONSE_TYPE.getValue(),
+                            mimeTypeMap.get(fileContentHandler.getFileExtension())
+                    )
+            );
+            return response;
         }
 
         // remove the forward slash if there is any
@@ -67,6 +80,7 @@ public class ActionHandler {
 
             // uriExecutionMap contains all the URI -> execution mapping for this request method
             Map<String, Param<String, String>> uriExecutionMap = executionMap.get(requestMethod);
+
             // requestURI           /welcome        or       /welcome/
             if (uriExecutionMap.containsKey(requestURI) || uriExecutionMap.containsKey(requestURI + "/")) {
                 //   com.sample.app.action.MainAction, welcome

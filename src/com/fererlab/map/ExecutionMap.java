@@ -1,4 +1,4 @@
-package com.fererlab.aa;
+package com.fererlab.map;
 
 import com.fererlab.dto.Param;
 

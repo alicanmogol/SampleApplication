@@ -1,7 +1,8 @@
 package com.fererlab.action;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.RandomAccessFile;
 import java.util.Scanner;
 
 /**
@@ -10,21 +11,29 @@ import java.util.Scanner;
 public class FileContentHandler {
 
     private String contentPath;
+    private String filePath;
+    private String fileExtension = "";
 
-    public String getContent(String folderName, String fileName) {
-        String xslContent = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
-                "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
-                "<xsl:output method=\"html\" encoding=\"utf-8\" indent=\"yes\" />\n" +
-                "<xsl:template match=\"/\">\n" +
-                "</xsl:template>\n" +
-                "</xsl:stylesheet>";
-        String xslFilePath = getContentPath() + folderName + "/" + fileName;
+    public byte[] getContent(String folderName, String fileName) {
+        byte[] bytes = new byte[0];
+        filePath = getContentPath() + folderName + "/" + fileName;
+        fileExtension = filePath.substring(filePath.lastIndexOf(".") + 1).trim();
         try {
-            xslContent = new Scanner(new File(xslFilePath)).useDelimiter("\\Z").next();
-        } catch (FileNotFoundException e) {
+            RandomAccessFile f = new RandomAccessFile(filePath, "rw");
+            bytes = new byte[(int) f.length()];
+            f.read(bytes);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return xslContent;
+        return bytes;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
     }
 
     private String getContentPath() {

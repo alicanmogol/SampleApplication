@@ -19,7 +19,8 @@ public class SampleApplication implements Application {
 
     private ActionHandler actionHandler = new ActionHandler(
             getClass().getClassLoader().getResource("ExecutionMap.properties"),
-            getClass().getClassLoader().getResource("AuthenticationAuthorizationMap.properties")
+            getClass().getClassLoader().getResource("AuthenticationAuthorizationMap.properties"),
+            getClass().getClassLoader().getResource("mimeTypesMap.properties")
     );
     private EbeanServer ebeanServer = null;
     private boolean isDevelopment = false;
@@ -47,8 +48,8 @@ public class SampleApplication implements Application {
         // read the cookie to Session object
         request.getSession().fromCookie("SampleApplication", "11cdc979547a8631cb477c052289b4837bd3c6c6-26e04590c57a839c7fe9956608b3");
 
-        Response response = actionHandler.runAction(request);
-        return response;
+        // run action and return response
+        return actionHandler.runAction(request);
     }
 
     @Override
@@ -65,9 +66,9 @@ public class SampleApplication implements Application {
 
         DataSourceConfig postgresDb = new DataSourceConfig();
         postgresDb.setDriver("org.postgresql.Driver");
-        postgresDb.setUsername("acm");
-        postgresDb.setPassword("123456");
-        postgresDb.setUrl("jdbc:postgresql://127.0.0.1:5432/sample");
+        postgresDb.setUsername("alicanmogol");
+        postgresDb.setPassword("");
+        postgresDb.setUrl("jdbc:postgresql://localhost:5432/sample");
         postgresDb.setHeartbeatSql("select count(*) from heart_beat");
 
         config.setDataSourceConfig(postgresDb);

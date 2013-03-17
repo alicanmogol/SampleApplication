@@ -1,8 +1,13 @@
 package com.fererlab.dto;
 
+import sun.security.pkcs.EncodingException;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -13,13 +18,21 @@ public class Response implements Serializable {
     private ParamMap<String, Param<String, Object>> headers;
     private Session session;
     private Status status;
-    private String content;
+    private String content = null;
+    private byte[] contentChar = null;
+
+    public Response(ParamMap<String, Param<String, Object>> headers, Session session, Status status, byte[] contentChar) {
+        this.headers = headers;
+        this.session = session;
+        this.status = status;
+        this.setContentChar(contentChar);
+    }
 
     public Response(ParamMap<String, Param<String, Object>> headers, Session session, Status status, String content) {
         this.headers = headers;
         this.session = session;
         this.status = status;
-        this.content = content;
+        this.setContent(content);
     }
 
     public ParamMap<String, Param<String, Object>> getHeaders() {
@@ -47,11 +60,24 @@ public class Response implements Serializable {
     }
 
     public String getContent() {
-        return content;
+        if (content != null) {
+            return content;
+        } else if (contentChar != null) {
+            return new String(contentChar);
+        }
+        return "";
     }
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public byte[] getContentChar() {
+        return contentChar;
+    }
+
+    public void setContentChar(byte[] contentChar) {
+        this.contentChar = contentChar;
     }
 
     @Override
@@ -61,10 +87,11 @@ public class Response implements Serializable {
                 ", session=" + session +
                 ", status=" + status +
                 ", content='" + content + '\'' +
+                ", contentChar='" + Arrays.toString(contentChar) + '\'' +
                 '}';
     }
 
-    public byte[] write() {
+    public void write(OutputStream outputStream) {
         StringBuilder sb = new StringBuilder();
         // add response code
         sb.append(headers.get(ResponseKeys.PROTOCOL.getValue()).getValue());
@@ -95,16 +122,45 @@ public class Response implements Serializable {
         // end headers
         sb.append("\r\n");
 
-        // add content
-        sb.append(content);
+        // add contentChar if not add content
+        if (contentChar != null) {
+            try {
+                // write the headers
+                try {
+                    outputStream.write(sb.toString().getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    outputStream.write(sb.toString().getBytes());
+                }
 
-        // append the delimiters
-        sb.append("\n\r\n\r");
+                //write the file content
+                outputStream.write(getContentChar());
 
-        try {
-            return sb.toString().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return sb.toString().getBytes();
+                // write the delimiters
+                outputStream.write("\n\r\n\r".getBytes());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else {
+
+            // append the content
+            sb.append(getContent());
+
+            // append the delimiters
+            sb.append("\n\r\n\r");
+
+            // write content to output stream
+            try {
+                try {
+                    outputStream.write(sb.toString().getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    outputStream.write(sb.toString().getBytes());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
     }
