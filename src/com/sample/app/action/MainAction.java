@@ -33,7 +33,7 @@ public class MainAction extends BaseAction {
 
         // add encrypted cookie
         try {
-            request.getSession().putEncrypt("KEY_HEREKEY_HERE", "encrypted-content", "content here ");
+            request.getSession().putEncrypt("KEY_HEREKEY_HERE", "encrypted-content", "content here");
         } catch (Exception e) {
             e.printStackTrace();
         }

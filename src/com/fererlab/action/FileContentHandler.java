@@ -1,9 +1,7 @@
 package com.fererlab.action;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Scanner;
 
 /**
  * acm | 2/27/13
@@ -18,12 +16,21 @@ public class FileContentHandler {
         byte[] bytes = new byte[0];
         filePath = getContentPath() + folderName + "/" + fileName;
         fileExtension = filePath.substring(filePath.lastIndexOf(".") + 1).trim();
+        RandomAccessFile f = null;
         try {
-            RandomAccessFile f = new RandomAccessFile(filePath, "rw");
+            f = new RandomAccessFile(filePath, "rw");
             bytes = new byte[(int) f.length()];
             f.read(bytes);
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (f != null) {
+                    f.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return bytes;
     }

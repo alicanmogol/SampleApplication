@@ -1,9 +1,10 @@
 package com.fererlab.action;
 
+import com.fererlab.cache.Cache;
+import com.fererlab.dto.*;
 import com.fererlab.map.AuthenticationAuthorizationMap;
 import com.fererlab.map.ExecutionMap;
 import com.fererlab.map.MimeTypeMap;
-import com.fererlab.dto.*;
 
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -42,23 +43,32 @@ public class ActionHandler {
             // remove the first 3 chars, {/,_,/}
             requestURI = requestURI.substring(3);
 
-            // request URI is either one of these; xsl, css, js, image, file,
-            String[] foldersAndFile = requestURI.split("/", 2);
-            String fileName = requestURI.substring((foldersAndFile[0] + "/").length());
-            FileContentHandler fileContentHandler = new FileContentHandler();
-            byte[] templateContent = fileContentHandler.getContent(foldersAndFile[0], fileName);
+            Map<byte[], String> contentAndExtension = Cache.getContentIfCached(requestURI);
+            if (contentAndExtension == null) {
+                // request URI is either one of these; xsl, css, js, image, file,
+                String[] foldersAndFile = requestURI.split("/", 2);
+                String fileName = requestURI.substring((foldersAndFile[0] + "/").length());
+                FileContentHandler fileContentHandler = new FileContentHandler();
+                byte[] content = fileContentHandler.getContent(foldersAndFile[0], fileName);
+                String extension = fileContentHandler.getFileExtension();
 
-            Response response =  new Response(
+                contentAndExtension = new HashMap<byte[], String>();
+                contentAndExtension.put(content, extension);
+                Cache.put(requestURI, contentAndExtension);
+            }
+            Map.Entry<byte[], String> entry = contentAndExtension.entrySet().iterator().next();
+
+            Response response = new Response(
                     new ParamMap<String, Param<String, Object>>(),
                     request.getSession(),
                     Status.STATUS_OK,
-                    templateContent
+                    entry.getKey()
             );
             response.getHeaders().put(
                     ResponseKeys.RESPONSE_TYPE.getValue(),
                     new Param<String, Object>(
                             ResponseKeys.RESPONSE_TYPE.getValue(),
-                            mimeTypeMap.get(fileContentHandler.getFileExtension())
+                            mimeTypeMap.get(entry.getValue())
                     )
             );
             return response;
