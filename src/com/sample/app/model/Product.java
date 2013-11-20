@@ -1,9 +1,7 @@
 package com.sample.app.model;
 
-import com.fererlab.converter.ParamConverter;
 import com.fererlab.dto.Model;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamConverter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
