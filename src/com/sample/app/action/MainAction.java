@@ -39,7 +39,7 @@ public class MainAction extends BaseAction {
         }
 
         // add encoded cookie
-        request.getSession().putEncoded("encoded-content", "content here111");
+        request.getSession().putEncoded("encoded-content", "content here");
 
         // add encrypted cookie
         try {
@@ -50,13 +50,19 @@ public class MainAction extends BaseAction {
 
         //request.getSession().deleteAll();
         request.getSession().put("test", "" + new Random().nextDouble());
-
         return Response.create(
                 request,
                 toContent(request, productList, product),
                 Status.STATUS_OK
         );
+    }
 
+    public Response sayHi(Request request) {
+        return Response.create(
+                request,
+                "Hi " + request.getParams().get("name").getValue(),
+                Status.STATUS_OK
+        );
     }
 
     public Response main(final Request request) {
