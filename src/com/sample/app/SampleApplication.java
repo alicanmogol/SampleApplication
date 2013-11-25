@@ -76,9 +76,7 @@ public class SampleApplication extends BaseApplication {
     }
 
     private void disconnectDB() {
-        ebeanServer.getServerCacheManager().clearAll();
-        EbeanShutdownHack.shutdownAllActiveEbeanServers();
-        ebeanServer = null;
+        EbeanShutdownHack.shutdownAllActiveEbeanServers(ebeanServer);
     }
 
 }

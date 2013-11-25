@@ -3,10 +3,7 @@ package com.sample.app.model;
 import com.fererlab.dto.Model;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * acm | 1/16/13
@@ -18,7 +15,7 @@ import javax.persistence.Table;
 public class Product implements Model {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     String serialNumber;

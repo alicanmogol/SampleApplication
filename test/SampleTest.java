@@ -10,6 +10,7 @@ import com.sample.app.model.Product;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -24,10 +25,43 @@ public class SampleTest {
     }
 
     public SampleTest() {
-        runXStreamTest();
+        runDBTest();
+        //runXStreamTest();
         //runPropertiesTest();
         //runActionHandlerTest();
         //runTests();
+    }
+
+    private void runDBTest() {
+        ServerConfig config = new ServerConfig();
+        config.setName("pgtest");
+
+        DataSourceConfig postgresDb = new DataSourceConfig();
+        postgresDb.setDriver("org.postgresql.Driver");
+        postgresDb.setUsername("alicanmogol");
+        postgresDb.setPassword("");
+        postgresDb.setUrl("jdbc:postgresql://localhost:5432/bfm");
+        postgresDb.setHeartbeatSql("select count(*) from heart_beat");
+
+        config.setDataSourceConfig(postgresDb);
+        config.setDdlGenerate(false);
+        config.setDdlRun(false);
+        config.setDefaultServer(true);
+        config.setRegister(true);
+        config.addClass(Product.class);
+        config.addPackage("com.sample.app.model");
+        config.setDatabaseSequenceBatchSize(1);
+
+        File ebeansResourceFile = new File("/tmp/ebeans");
+        if (!ebeansResourceFile.exists()) {
+            Boolean isDirCreated = ebeansResourceFile.mkdirs();
+        }
+        config.setResourceDirectory("/tmp/ebeans");
+        EbeanServerFactory.create(config);
+
+        Product product = new Product();
+        product.setSerialNumber("qweqwe");
+        Ebean.save(product);
     }
 
     private void runXStreamTest() {
@@ -137,9 +171,9 @@ public class SampleTest {
 
         DataSourceConfig postgresDb = new DataSourceConfig();
         postgresDb.setDriver("org.postgresql.Driver");
-        postgresDb.setUsername("acm");
-        postgresDb.setPassword("123456");
-        postgresDb.setUrl("jdbc:postgresql://127.0.0.1:5432/sample");
+        postgresDb.setUsername("alicanmogol");
+        postgresDb.setPassword("");
+        postgresDb.setUrl("jdbc:postgresql://127.0.0.1:5432/bfm");
         postgresDb.setHeartbeatSql("select count(*) from heart_beat");
 
         config.setDataSourceConfig(postgresDb);
