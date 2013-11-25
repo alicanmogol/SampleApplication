@@ -1,33 +1,30 @@
 package com.sample.app;
 
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.EbeanServer;
-import com.avaje.ebean.EbeanServerFactory;
-import com.avaje.ebean.config.DataSourceConfig;
-import com.avaje.ebean.config.ServerConfig;
-import com.avaje.ebeaninternal.server.lib.EbeanShutdownHack;
 import com.fererlab.app.BaseApplication;
 import com.fererlab.dto.Request;
 import com.fererlab.dto.Response;
+import com.fererlab.dto.Status;
 import com.sample.app.model.Product;
 
-import java.io.File;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 
 /**
  * acm | 1/10/13
  */
 public class SampleApplication extends BaseApplication {
 
-    private EbeanServer ebeanServer = null;
+    private EntityManager em = null;
 
     @Override
     public void start() {
-        if (ebeanServer == null) {
-            try {
-                ebeanServer = Ebean.getServer("pgtest");
-            } catch (Exception e) {
-                connectToDB();
+        try {
+            if (em == null) {
+                em = Persistence.createEntityManagerFactory("hsqldb-ds").createEntityManager();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -36,47 +33,27 @@ public class SampleApplication extends BaseApplication {
         // read the cookie to Session object
         request.getSession().fromCookie(this.getClass().getPackage().getName() + "." + this.getClass().getName(),
                 "7a8631cb477c052289b4837bd3c6c611cdc97954-9956608b326e04590c57a839c7fe");
+
+        EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
+        Product product = new Product();
+        product.setSerialNumber("XZCZ32423XCZX");
+        em.persist(product);
+        transaction.commit();
+
+        System.out.println("Generated ID is: " + product.getId());
+
         // run application
-        return super.runApplication(request);
+        return Response.create(
+                request,
+                product.getSerialNumber(),
+                Status.STATUS_OK
+        );
     }
 
     @Override
     public void stop() {
-        if (ebeanServer != null) {
-            disconnectDB();
-        }
-    }
-
-    private void connectToDB() {
-        ServerConfig config = new ServerConfig();
-        config.setName("pgtest");
-
-        DataSourceConfig postgresDb = new DataSourceConfig();
-        postgresDb.setDriver("org.postgresql.Driver");
-        postgresDb.setUsername("alicanmogol");
-        postgresDb.setPassword("");
-        postgresDb.setUrl("jdbc:postgresql://localhost:5432/bfm");
-        postgresDb.setHeartbeatSql("select count(*) from heart_beat");
-
-        config.setDataSourceConfig(postgresDb);
-        config.setDdlGenerate(false);
-        config.setDdlRun(false);
-        config.setDefaultServer(true);
-        config.setRegister(true);
-        config.addClass(Product.class);
-        config.addPackage("com.sample.app.model");
-        config.setDatabaseSequenceBatchSize(1);
-
-        File ebeansResourceFile = new File("/tmp/ebeans");
-        if (!ebeansResourceFile.exists()) {
-            Boolean isDirCreated = ebeansResourceFile.mkdirs();
-        }
-        config.setResourceDirectory("/tmp/ebeans");
-        ebeanServer = EbeanServerFactory.create(config);
-    }
-
-    private void disconnectDB() {
-        EbeanShutdownHack.shutdownAllActiveEbeanServers(ebeanServer);
+        em.close();
     }
 
 }
