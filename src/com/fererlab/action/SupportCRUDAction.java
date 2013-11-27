@@ -14,6 +14,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
 
     public SupportCRUDAction(Class<T> type) {
         crudAction = new BaseEBeanCRUDAction<T>(type);
+        //crudAction = new BaseJpaCRUDAction<T>(type);
     }
 
     public SupportCRUDAction(Class<T> type, Class<CRUDAction<T>> crudActionClass) {
