@@ -16,8 +16,10 @@ public class Product implements Model {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     Long id;
 
+    @Column(name = "serial_number")
     String serialNumber;
 
     @Override
