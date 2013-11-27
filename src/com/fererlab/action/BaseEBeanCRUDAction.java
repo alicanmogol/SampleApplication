@@ -16,11 +16,11 @@ import java.util.Locale;
 /**
  * acm 11/12/12
  */
-public class BaseCRUDAction<T extends Model> extends BaseAction implements CRUDAction<T> {
+public class BaseEBeanCRUDAction<T extends Model> extends BaseAction implements CRUDAction<T> {
 
     private Class<T> type;
 
-    public BaseCRUDAction(Class<T> type) {
+    public BaseEBeanCRUDAction(Class<T> type) {
         super();
         this.type = type;
 

@@ -8,17 +8,27 @@ import java.util.List;
 /**
  * acm | 1/21/13
  */
-public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
+public class SupportCRUDAction<T extends Model> extends BaseAction {
+
+    private CRUDAction<T> crudAction;
 
     public SupportCRUDAction(Class<T> type) {
-        super(type);
+        crudAction = new BaseEBeanCRUDAction<T>(type);
+    }
+
+    public SupportCRUDAction(Class<T> type, Class<CRUDAction<T>> crudActionClass) {
+        try {
+            crudAction = crudActionClass.getConstructor(type).newInstance(type);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Response find(Request request) {
         try {
             return Response.create(
                     request,
-                    toContent(request, super.find(request.getParams().getValue("id"))),
+                    toContent(request, crudAction.find(request.getParams().getValue("id"))),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -30,7 +40,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
         try {
             return Response.create(
                     request,
-                    toContent(request, super.findAll(clearKeyValuePairs(request.getParams()))),
+                    toContent(request, crudAction.findAll(clearKeyValuePairs(request.getParams()))),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -40,7 +50,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
 
     public Response create(Request request) {
         try {
-            T t = super.create(clearKeyValuePairs(request.getParams()));
+            T t = crudAction.create(clearKeyValuePairs(request.getParams()));
             return Response.create(
                     request,
                     toContent(request, t),
@@ -56,7 +66,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
             ParamMap<String, Param<String, Object>> keyValuePairs = clearKeyValuePairs(request.getParams());
             return Response.create(
                     request,
-                    toContent(request, super.update(keyValuePairs.remove("id").getValue(), keyValuePairs)),
+                    toContent(request, crudAction.update(keyValuePairs.remove("id").getValue(), keyValuePairs)),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -68,7 +78,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
         try {
             return Response.create(
                     request,
-                    toContent(request, super.delete(request.getParams().getValue("id"))),
+                    toContent(request, crudAction.delete(request.getParams().getValue("id"))),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -95,7 +105,7 @@ public class SupportCRUDAction<T extends Model> extends BaseCRUDAction<T> {
             }
             return Response.create(
                     request,
-                    toContent(request, super.deleteAll(ids), ids),
+                    toContent(request, crudAction.deleteAll(ids), ids),
                     Status.STATUS_OK
             );
         } catch (Exception e) {

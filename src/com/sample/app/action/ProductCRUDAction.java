@@ -1,13 +1,15 @@
 package com.sample.app.action;
 
-import com.fererlab.action.SupportCRUDAction;
-import com.fererlab.dto.*;
-import com.sample.app.model.*;
+import com.fererlab.action.BaseEBeanCRUDAction;
+import com.fererlab.dto.Request;
+import com.fererlab.dto.Response;
+import com.fererlab.dto.Status;
+import com.sample.app.model.Product;
 
 /**
  * acm | 1/16/13
  */
-public class ProductCRUDAction extends SupportCRUDAction<Product> {
+public class ProductCRUDAction extends BaseEBeanCRUDAction<Product> {
 
     public ProductCRUDAction() {
         super(Product.class);
