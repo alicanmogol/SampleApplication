@@ -25,13 +25,19 @@ public class BaseCRUDAction<T extends Model> extends BaseAction implements CRUDA
         super();
         this.type = type;
 
+        try {
+            // ebean related xml/json alias
+            Class beanList = Class.forName("com.avaje.ebean.common.BeanList.class");
+            getXStream().alias(type.getSimpleName() + "s", beanList);
+            getXStreamJSON().alias(type.getSimpleName() + "s", beanList);
+        } catch (ClassNotFoundException e) {
+        }
+
         getXStream().autodetectAnnotations(true);
         getXStream().alias(type.getSimpleName(), type);
-        //TODO getXStream().alias(type.getSimpleName() + "s", com.avaje.ebean.common.BeanList.class);
 
         getXStreamJSON().autodetectAnnotations(true);
         getXStreamJSON().alias(type.getSimpleName(), type);
-        //TODO getXStreamJSON().alias(type.getSimpleName() + "s", com.avaje.ebean.common.BeanList.class);
     }
 
     public Class<T> getType() {
@@ -174,7 +180,7 @@ public class BaseCRUDAction<T extends Model> extends BaseAction implements CRUDA
                             } catch (IllegalArgumentException iae) {
                                 if (parameterClasses.length > 0) {
                                     try {
-                                        // TODO create object creators for each type available
+                                        // method.invoke(...) should work, this should not be called
                                         Constructor constructor = Class.forName(parameterClasses[0].getName()).getConstructor(String.class);
                                         value = constructor.newInstance(keyValuePairs.get(fieldName).getValue());
                                         method.invoke(t, value);
@@ -232,7 +238,7 @@ public class BaseCRUDAction<T extends Model> extends BaseAction implements CRUDA
                             } catch (IllegalArgumentException iae) {
                                 if (parameterClasses.length > 0) {
                                     try {
-                                        // TODO create object creators for each type available
+                                        // method.invoke(...) should work, this should not be called
                                         Constructor constructor = Class.forName(parameterClasses[0].getName()).getConstructor(String.class);
                                         value = constructor.newInstance(keyValuePairs.get(fieldName).getValue());
                                         method.invoke(t, value);
