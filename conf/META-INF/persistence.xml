@@ -7,8 +7,13 @@
         <description>HSQLDB Persistence Unit</description>
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
 
-        <!-- This is where we tell JPA/Hibernate about our @Entity objects -->
+        <!-- entity objects may be defined as a jar file or they can be defined one by one -->
+        <!-- <jar-file>entities.jar</jar-file> -->
+        <!-- <class>com.app.model.MyEntity</class> -->
         <class>com.sample.app.model.Product</class>
+
+        <!-- if exclude-unlisted-classes is false or it is removed, then all the files in the classpath
+                annotated as Entity will be loaded -->
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>

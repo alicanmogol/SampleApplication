@@ -10,7 +10,6 @@ import com.fererlab.app.BaseApplication;
 import com.fererlab.db.EM;
 import com.fererlab.dto.Request;
 import com.fererlab.dto.Response;
-import com.sample.app.model.Product;
 
 import java.io.File;
 
@@ -75,7 +74,9 @@ public class SampleApplication extends BaseApplication {
         config.setDdlRun(false);
         config.setDefaultServer(true);
         config.setRegister(true);
-        config.addClass(Product.class);
+        // model classes may be added one by one or as packages ex:
+        // config.addClass(Product.class); // add an entity
+        // config.addPackage("com.sample.app.model"); // add a package of entities
         config.addPackage("com.sample.app.model");
         config.setDatabaseSequenceBatchSize(1);
 
