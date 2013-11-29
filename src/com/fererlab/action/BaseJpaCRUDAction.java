@@ -25,14 +25,6 @@ public class BaseJpaCRUDAction<T extends Model> extends BaseAction implements CR
         super();
         this.type = type;
 
-        try {
-            // ebean related xml/json alias
-            Class beanList = Class.forName("com.avaje.ebean.common.BeanList.class");
-            getXStream().alias(type.getSimpleName() + "s", beanList);
-            getXStreamJSON().alias(type.getSimpleName() + "s", beanList);
-        } catch (ClassNotFoundException e) {
-        }
-
         getXStream().autodetectAnnotations(true);
         getXStream().alias(type.getSimpleName(), type);
 
@@ -70,10 +62,18 @@ public class BaseJpaCRUDAction<T extends Model> extends BaseAction implements CR
 
         // orderBy may be null
         String orderBy = null;
+        Integer offset = null;
+        Integer limit = null;
         if (keyValuePairs != null) {
-            // set orderBy if exists
-            if (keyValuePairs.containsKey("orderBy") && keyValuePairs.getValue("orderBy") != null) {
-                orderBy = keyValuePairs.remove("orderBy").getValue().toString().trim().replace("%20", " ");
+            // set offset, limit and orderBy any if exists
+            if (keyValuePairs.containsKey("_offset") && keyValuePairs.getValue("_offset") != null) {
+                offset = Integer.valueOf(keyValuePairs.remove("_offset").getValue().toString());
+            }
+            if (keyValuePairs.containsKey("_limit") && keyValuePairs.getValue("_limit") != null) {
+                limit = Integer.valueOf(keyValuePairs.remove("_limit").getValue().toString());
+            }
+            if (keyValuePairs.containsKey("_order") && keyValuePairs.getValue("_order") != null) {
+                orderBy = keyValuePairs.remove("_order").getValue().toString().trim().replace("%20", " ");
             }
             // for rest of the param list
             for (final Param<String, Object> param : keyValuePairs.getParamList()) {
@@ -148,6 +148,16 @@ public class BaseJpaCRUDAction<T extends Model> extends BaseAction implements CR
 
         // create query
         TypedQuery<T> query = EM.getEntityManager().createQuery(criteriaQuery);
+
+        // set offset if available
+        if (offset != null) {
+            query = query.setFirstResult(offset);
+        }
+
+        // set limit if available
+        if (limit != null) {
+            query = query.setMaxResults(limit);
+        }
 
         // set parameter values
         if (parameterList.size() > 0) {

@@ -2,6 +2,7 @@ package com.fererlab.action;
 
 import com.fererlab.dto.*;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
     private CRUDAction<T> crudAction;
 
     public SupportCRUDAction(Class<T> type) {
-        crudAction = new BaseJpaCRUDAction<T>(type);
+        crudAction = new BaseEBeanCRUDAction<T>(type);
         // crudAction has below implementations currently available
         // crudAction = new BaseEBeanCRUDAction<T>(type);
         // crudAction = new BaseJpaCRUDAction<T>(type);
@@ -31,7 +32,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
         try {
             return Response.create(
                     request,
-                    toContent(request, crudAction.find(request.getParams().getValue("id"))),
+                    crudAction.toContent(request, crudAction.find(request.getParams().getValue("id"))),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -43,7 +44,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
         try {
             return Response.create(
                     request,
-                    toContent(request, crudAction.findAll(clearKeyValuePairs(request.getParams()))),
+                    crudAction.toContent(request, crudAction.findAll(clearKeyValuePairs(request.getParams()))),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -56,7 +57,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
             T t = crudAction.create(clearKeyValuePairs(request.getParams()));
             return Response.create(
                     request,
-                    toContent(request, t),
+                    crudAction.toContent(request, t),
                     Status.STATUS_CREATED
             );
         } catch (Exception e) {
@@ -69,7 +70,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
             ParamMap<String, Param<String, Object>> keyValuePairs = clearKeyValuePairs(request.getParams());
             return Response.create(
                     request,
-                    toContent(request, crudAction.update(keyValuePairs.remove("id").getValue(), keyValuePairs)),
+                    crudAction.toContent(request, crudAction.update(keyValuePairs.remove("id").getValue(), keyValuePairs)),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -81,7 +82,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
         try {
             return Response.create(
                     request,
-                    toContent(request, crudAction.delete(request.getParams().getValue("id"))),
+                    crudAction.toContent(request, crudAction.delete(request.getParams().getValue("id"))),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -108,7 +109,7 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
             }
             return Response.create(
                     request,
-                    toContent(request, crudAction.deleteAll(ids), ids),
+                    crudAction.toContent(request, crudAction.deleteAll(ids), ids),
                     Status.STATUS_OK
             );
         } catch (Exception e) {
@@ -117,6 +118,67 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
     }
 
     private ParamMap<String, Param<String, Object>> clearKeyValuePairs(ParamMap<String, Param<String, Object>> params) {
+
+        // put all params to key value pairs, but not the request keys
+        ParamMap<String, Param<String, Object>> keyValuePairs = new ParamMap<String, Param<String, Object>>();
+        keyValuePairs.putAll(params);
+        for (RequestKeys requestKeys : RequestKeys.values()) {
+            if (params.containsKey(requestKeys.getValue())) {
+                keyValuePairs.remove(requestKeys.getValue());
+            }
+        }
+
+        // for each value in the keyValuePair, set the correct type for value
+        for (String key : keyValuePairs.keySet()) {
+            Param<String, Object> param = keyValuePairs.get(key);
+            try {
+                Field field = crudAction.getType().getDeclaredField(param.getKey());
+                Class<?> fieldClass = field.getType();
+                // then if the value's type is different from that, try to cast,
+                if (!fieldClass.isInstance(param.getValue())) {
+                    try {
+                        param = new Param<String, Object>(
+                                param.getKey(),
+                                fieldClass.cast(param.getValue()),
+                                param.getValueSecondary(),
+                                param.getRelation()
+                        );
+                    } catch (Exception e) {
+                        //              if cannot cast, try to create an instance of value's type using the
+                        //                  value(probably the string value) as the constructor parameter of valueOf(...) parameter
+                        try {
+                            if (param.getRelation().equals(ParamRelation.BETWEEN)) {
+                                param = new Param<String, Object>(
+                                        param.getKey(),
+                                        fieldClass.getDeclaredConstructor(String.class).newInstance(param.getValue().toString()),
+                                        fieldClass.getDeclaredConstructor(String.class).newInstance(param.getValueSecondary().toString()),
+                                        param.getRelation()
+                                );
+                            } else {
+                                param = new Param<String, Object>(
+                                        param.getKey(),
+                                        fieldClass.getDeclaredConstructor(String.class).newInstance(param.getValue().toString()),
+                                        param.getValueSecondary(),
+                                        param.getRelation()
+                                );
+                            }
+                        } catch (Exception e1) {
+                            // this value's class and the declared field's class are not compatible, will skip this key/value pair!
+                            e1.printStackTrace();
+                            continue;
+                        }
+                    }
+                }
+                // put the param over the old key's value
+                keyValuePairs.put(key, param);
+            } catch (Exception e) {
+                // current param and its key/value pair is ok as they are, do nothing
+            }
+        }
+        return keyValuePairs;
+    }
+
+    private ParamMap<String, Param<String, Object>> clearKeyValuePairs_(ParamMap<String, Param<String, Object>> params) {
         ParamMap<String, Param<String, Object>> keyValuePairs = new ParamMap<String, Param<String, Object>>();
         keyValuePairs.putAll(params);
         for (RequestKeys requestKeys : RequestKeys.values()) {

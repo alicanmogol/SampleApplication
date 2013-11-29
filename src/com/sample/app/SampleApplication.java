@@ -7,9 +7,10 @@ import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
 import com.avaje.ebeaninternal.server.lib.EbeanShutdownHack;
 import com.fererlab.app.BaseApplication;
-import com.fererlab.db.EM;
 import com.fererlab.dto.Request;
+import com.fererlab.dto.RequestKeys;
 import com.fererlab.dto.Response;
+import com.sample.app.model.Product;
 
 import java.io.File;
 
@@ -22,20 +23,6 @@ public class SampleApplication extends BaseApplication {
 
     @Override
     public void start() {
-        // EBean
-        if (ebeanServer == null) {
-            try {
-                ebeanServer = Ebean.getServer("pgtest");
-            } catch (Exception e) {
-                connectToDB();
-            }
-        }
-        // JPA
-        try {
-            EM.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 
@@ -44,6 +31,18 @@ public class SampleApplication extends BaseApplication {
         // read the cookie to Session object
         request.getSession().fromCookie(this.getClass().getPackage().getName() + "." + this.getClass().getName(),
                 "7a8631cb477c052289b4837bd3c6c611cdc97954-9956608b326e04590c57a839c7fe");
+
+        if (!request.getParams().get(RequestKeys.URI.getValue()).getValue().toString().startsWith("/_/")) {
+            // EBean
+            if (ebeanServer == null) {
+                try {
+                    ebeanServer = Ebean.getServer("pgtest");
+                } catch (Exception e) {
+                    connectToDB();
+                }
+            }
+        }
+
         // run application
         return super.runApplication(request);
     }
@@ -53,14 +52,13 @@ public class SampleApplication extends BaseApplication {
         if (ebeanServer != null) {
             disconnectDB();
         }
-        // JPA
-        EM.stop();
     }
 
 
     private void connectToDB() {
         ServerConfig config = new ServerConfig();
         config.setName("pgtest");
+        config.loadFromProperties();
 
         DataSourceConfig postgresDb = new DataSourceConfig();
         postgresDb.setDriver("org.postgresql.Driver");
@@ -77,7 +75,7 @@ public class SampleApplication extends BaseApplication {
         // model classes may be added one by one or as packages ex:
         // config.addClass(Product.class); // add an entity
         // config.addPackage("com.sample.app.model"); // add a package of entities
-        config.addPackage("com.sample.app.model");
+        config.addClass(Product.class);
         config.setDatabaseSequenceBatchSize(1);
 
         File ebeansResourceFile = new File("/tmp/ebeans");

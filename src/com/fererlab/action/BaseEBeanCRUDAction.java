@@ -2,7 +2,6 @@ package com.fererlab.action;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.FutureList;
 import com.fererlab.dto.Model;
 import com.fererlab.dto.Param;
 import com.fererlab.dto.ParamMap;
@@ -33,6 +32,10 @@ public class BaseEBeanCRUDAction<T extends Model> extends BaseAction implements 
         getXStreamJSON().alias(type.getSimpleName() + "s", com.avaje.ebean.common.BeanList.class);
     }
 
+    public Class<T> getType() {
+        return type;
+    }
+
     @Override
     public T find(Object id) {
         return Ebean.find(type, id);
@@ -40,15 +43,22 @@ public class BaseEBeanCRUDAction<T extends Model> extends BaseAction implements 
 
     @Override
     public List<T> findAll(ParamMap<String, Param<String, Object>> keyValuePairs) {
-        FutureList<T> futureList = Ebean.createQuery(type).findFutureList();
         ExpressionList<T> expressionList = Ebean.find(type).where();
         String orderBy = null;
 
         if (keyValuePairs != null) {
-            if (keyValuePairs.containsKey("orderBy") && keyValuePairs.getValue("orderBy") != null) {
-                orderBy = keyValuePairs.remove("orderBy").getValue().toString();
+            // set offset, limit and orderBy any if exists
+            if (keyValuePairs.containsKey("_offset") && keyValuePairs.getValue("_offset") != null) {
+                expressionList.setFirstRow(Integer.valueOf(keyValuePairs.remove("_offset").getValue().toString()));
             }
-            for (Param<String, Object> param : keyValuePairs.getParamList()) {
+            if (keyValuePairs.containsKey("_limit") && keyValuePairs.getValue("_limit") != null) {
+                expressionList.setMaxRows(Integer.valueOf(keyValuePairs.remove("_limit").getValue().toString()));
+            }
+            if (keyValuePairs.containsKey("_order") && keyValuePairs.getValue("_order") != null) {
+                orderBy = keyValuePairs.remove("_order").getValue().toString().trim().replace("%20", " ");
+            }
+            // for rest of the param list
+            for (final Param<String, Object> param : keyValuePairs.getParamList()) {
                 switch (param.getRelation()) {
                     case EQ:
                         expressionList = expressionList.eq(param.getKey(), param.getValue());
@@ -100,7 +110,7 @@ public class BaseEBeanCRUDAction<T extends Model> extends BaseAction implements 
                             } catch (IllegalArgumentException iae) {
                                 if (parameterClasses.length > 0) {
                                     try {
-                                        // TODO create object creators for each type available
+                                        // method.invoke(...) should work, this should not be called
                                         Constructor constructor = Class.forName(parameterClasses[0].getName()).getConstructor(String.class);
                                         value = constructor.newInstance(keyValuePairs.get(fieldName).getValue());
                                         method.invoke(t, value);
@@ -158,7 +168,7 @@ public class BaseEBeanCRUDAction<T extends Model> extends BaseAction implements 
                             } catch (IllegalArgumentException iae) {
                                 if (parameterClasses.length > 0) {
                                     try {
-                                        // TODO create object creators for each type available
+                                        // method.invoke(...) should work, this should not be called
                                         Constructor constructor = Class.forName(parameterClasses[0].getName()).getConstructor(String.class);
                                         value = constructor.newInstance(keyValuePairs.get(fieldName).getValue());
                                         method.invoke(t, value);

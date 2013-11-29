@@ -1,19 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
-    </script>
-    <script>
+    <script src="../js/jquery-2.0.3.js"></script>
+    <script type="text/javascript">
+        function i18n(field) {
+            return field;
+        }
+        function dataGridForModel(dataGridId, modelName) {
+            $.ajax({
+                headers: {"RESPONSE_TYPE": "json"},
+                url: "http://localhost:9091/sample/*/all/" + modelName,
+                context: document.body
+            }).success(function (data) {
+                        var models = data[0][modelName + "s"][0][modelName.toLowerCase()];
+                        var modelFields = [];
+
+                        var dataGrid = $($('#' + dataGridId)[0]);
+
+                        var dataGridHead = dataGrid.find('thead');
+                        var rowHeadFields = '<tr><th></th>';
+                        var rowHeadSearch = '<tr><th><input type="checkbox"/></th>';
+                        for (var field in models[0]) {
+                            if (models[0].hasOwnProperty(field)) {
+                                var fieldName = field.toString();
+                                if (fieldName.substring(0, 1) != "@") {
+                                    modelFields.push(field);
+                                    rowHeadFields += '<th>' + i18n(fieldName) + '</th>';
+                                    rowHeadSearch += '<th><input type="text"/></th>';
+                                }
+                            }
+                        }
+                        rowHeadFields += '<th>[+] [New] [_]</th></tr>';
+                        rowHeadSearch += '<th>[search]</th></tr>';
+                        dataGridHead.append(rowHeadFields);
+                        dataGridHead.append(rowHeadSearch);
+
+                        var dataGridBody = dataGrid.find('tbody');
+                        for (var m = 0; m < models.length; m++) {
+                            var model = models[m];
+                            var row = '<tr><td><input type="checkbox"/></td>';
+                            for (var i = 0; i < modelFields.length; i++) {
+                                row += '<td>' + model[modelFields[i]] + '</td>';
+                            }
+                            row += '<td>[E] [V] [D]</td></tr>';
+                            dataGridBody.append(row);
+                        }
+                        console.log("success data: " + data);
+                    }).done(function (data) {
+                        console.log("done data: " + data);
+                    }).fail(function (data) {
+                        console.log("fail data: " + data);
+                    }).always(function (data) {
+                        console.log("always data: " + data);
+                    });
+        }
+
         $(document).ready(function () {
-            $("p").click(function () {
-                $(this).hide();
-            });
+            dataGridForModel("crudGrid1", "Product");
         });
     </script>
 </head>
 <body>
-<p>If you click on me, I will disappear.</p>
-
+<table border="1" id="crudGrid1">
+    <thead>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+    <tr>
+        <td>[D]</td>
+        <td colspan="4">
+            <div style="float:left">[Refresh]</div>
+            <div style="float:right">
+                <select>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                </select>
+                1 .. 4 5 6 . . 9
+                <select>
+                    <option>10</option>
+                    <option>20</option>
+                    <option>50</option>
+                    <option>100</option>
+                </select>
+            </div>
+        </td>
+    </tr>
+    </tfoot>
+</table>
 </body>
 </html>
 

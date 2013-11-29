@@ -1,15 +1,9 @@
 package com.sample.app.action;
 
 import com.fererlab.action.BaseAction;
-import com.fererlab.collect.DBExec;
-import com.fererlab.collect.Exec;
-import com.fererlab.collect.HttpExec;
 import com.fererlab.dto.*;
 import com.sample.app.model.Product;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.List;
 import java.util.Random;
 
@@ -58,21 +52,20 @@ public class MainAction extends BaseAction {
     }
 
     public Response sayHi(Request request) {
+        String name = request.getParams().get("name") != null ? String.valueOf(request.getParams().get("name").getValue()) : "";
         return Response.create(
                 request,
-                "Hi " + request.getParams().get("name").getValue(),
+                "Hi " + name,
                 Status.STATUS_OK
         );
     }
 
     public Response main(final Request request) {
+        return sayHi(request);
         /*
-        //
-        Object response = collect();
-        return Response.create(request, toContent(request, productList), Status.STATUS_OK);
-         */
         List<Object> response = collect(
-                2 * 60 * 1000 /*max 2 minutes for these executions to complete*/,
+                //max 2 minutes for these executions to complete
+                2 * 60 * 1000,
                 new DBExec() {
                     @Override
                     public Object run() {
@@ -115,6 +108,7 @@ public class MainAction extends BaseAction {
                 }
         );
         return Response.create(request, toContent(request, response), Status.STATUS_OK);
+        */
     }
 
 }
