@@ -178,32 +178,4 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
         return keyValuePairs;
     }
 
-    private ParamMap<String, Param<String, Object>> clearKeyValuePairs_(ParamMap<String, Param<String, Object>> params) {
-        ParamMap<String, Param<String, Object>> keyValuePairs = new ParamMap<String, Param<String, Object>>();
-        keyValuePairs.putAll(params);
-        for (RequestKeys requestKeys : RequestKeys.values()) {
-            if (params.containsKey(requestKeys.getValue())) {
-                keyValuePairs.remove(requestKeys.getValue());
-            }
-        }
-        for (String key : keyValuePairs.keySet()) {
-            Param<String, Object> param = keyValuePairs.get(key);
-            try {
-                if ("true".equalsIgnoreCase(param.getValue().toString()) || "false".equalsIgnoreCase(param.getValue().toString())) {
-                    keyValuePairs.put(key, new Param<String, Object>(key, Boolean.valueOf(param.getValue().toString())));
-                } else {
-                    keyValuePairs.put(key, new Param<String, Object>(
-                            key,
-                            Integer.valueOf(param.getValue().toString()),
-                            param.getRelation().equals(ParamRelation.BETWEEN) && param.getValueSecondary() != null ? Integer.valueOf(param.getValueSecondary().toString()) : param.getValueSecondary(),
-                            param.getRelation()
-                    ));
-                }
-            } catch (Exception e) {
-                // current param and its key/value pair is ok as they are, do nothing
-            }
-        }
-        return keyValuePairs;
-    }
-
 }
