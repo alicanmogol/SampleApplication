@@ -9,10 +9,10 @@
         function dataGridForModel(dataGridId, modelName) {
             $.ajax({
                 headers: {"RESPONSE_TYPE": "json"},
-                url: "http://localhost:9091/sample/*/all/" + modelName,
+                url: "/sample/*/all/" + modelName,
                 context: document.body
             }).success(function (data) {
-                        var models = data[0][modelName + "s"][0][modelName.toLowerCase()];
+                        var models = data[modelName + "s"][0][modelName.toLowerCase()];
                         var modelFields = [];
 
                         var dataGrid = $($('#' + dataGridId)[0]);

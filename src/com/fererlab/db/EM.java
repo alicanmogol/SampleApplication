@@ -22,11 +22,13 @@ public class EM {
     }
 
     public static void stop() {
-        if (entityManager.isOpen()) {
-            entityManager.close();
-        }
-        if (entityManagerFactory.isOpen()) {
-            entityManagerFactory.close();
+        if (entityManager != null) {
+            if (entityManager.isOpen()) {
+                entityManager.close();
+            }
+            if (entityManagerFactory.isOpen()) {
+                entityManagerFactory.close();
+            }
         }
     }
 

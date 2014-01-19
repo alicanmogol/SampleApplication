@@ -14,10 +14,10 @@ public class SupportCRUDAction<T extends Model> extends BaseAction {
     private CRUDAction<T> crudAction;
 
     public SupportCRUDAction(Class<T> type) {
-        crudAction = new BaseEBeanCRUDAction<T>(type);
+        //crudAction = new BaseEBeanCRUDAction<T>(type);
         // crudAction has below implementations currently available
         // crudAction = new BaseEBeanCRUDAction<T>(type);
-        // crudAction = new BaseJpaCRUDAction<T>(type);
+        crudAction = new BaseJpaCRUDAction<T>(type);
     }
 
     public SupportCRUDAction(Class<T> type, Class<CRUDAction<T>> crudActionClass) {
