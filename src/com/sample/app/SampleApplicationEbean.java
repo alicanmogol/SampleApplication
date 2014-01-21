@@ -26,7 +26,6 @@ public class SampleApplicationEbean extends BaseApplication {
     public void start() {
     }
 
-
     @Override
     public Response runApplication(final Request request) {
         // read the cookie to Session object
@@ -54,7 +53,6 @@ public class SampleApplicationEbean extends BaseApplication {
             disconnectDB();
         }
     }
-
 
     private void connectToDB() {
         ServerConfig config = new ServerConfig();

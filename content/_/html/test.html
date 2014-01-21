@@ -9,10 +9,15 @@
         function dataGridForModel(dataGridId, modelName) {
             $.ajax({
                 headers: {"RESPONSE_TYPE": "json"},
-                url: "/sample/*/all/" + modelName,
+                url: "/cms/*/all/" + modelName,
                 context: document.body
             }).success(function (data) {
-                        var models = data[modelName + "s"][0][modelName.toLowerCase()];
+                        var models;
+                        try {
+                            models = data[0][modelName + "s"][0][modelName.toLowerCase()]; // ebean
+                        } catch (e) {
+                            models = data[0].list[0][modelName.toLowerCase()]; // jpa
+                        }
                         var modelFields = [];
 
                         var dataGrid = $($('#' + dataGridId)[0]);
