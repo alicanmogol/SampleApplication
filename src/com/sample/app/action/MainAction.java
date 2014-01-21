@@ -61,7 +61,8 @@ public class MainAction extends BaseAction {
     }
 
     public Response main(final Request request) {
-        return sayHi(request);
+        return fileContentResponse(request, "/_/html/index.html");
+        //return sayHi(request);
         /*
         List<Object> response = collect(
                 //max 2 minutes for these executions to complete
@@ -110,5 +111,6 @@ public class MainAction extends BaseAction {
         return Response.create(request, toContent(request, response), Status.STATUS_OK);
         */
     }
+
 
 }
